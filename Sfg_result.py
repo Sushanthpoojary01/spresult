@@ -2,7 +2,7 @@ import datetime
 import pytz
 import re
 import os
-from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, Filters
 from telegram.utils.helpers import escape_markdown
 from telegram.error import Unauthorized, BadRequest
@@ -306,7 +306,7 @@ def send_to_saved_chats(context, text):
     try:
         for chat_id in CHAT_IDS:
             try:
-                context.bot.send_message(chat_id=chat_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
+                context.bot.send_message(chat_id=chat_id, text=text)
                 print(f"Message sent successfully to chat ID: {chat_id}")
             except Unauthorized as e:
                 BLOCKED_USERS.add(chat_id)
@@ -322,7 +322,7 @@ def send_to_saved_chats(context, text):
 
 def send_to_subscribers(context, text):
     for user_id, _ in SUBSCRIBERS:
-        context.bot.send_message(chat_id=user_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
+        context.bot.send_message(chat_id=user_id, text=text)
 
 BLOCKED_USERS = set()
 
@@ -351,18 +351,18 @@ def forward_message(update, context):
                 # Forward to channels
                 for chat_id in GROUP_CHAT_IDS:
                     try:
-                        context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                        context.bot.send_message(chat_id=chat_id, text=modified_live_text)
                     except Unauthorized:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 try:
-                    context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text)
                 except Unauthorized:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
                 # Forward to saved chat IDs
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
                         try:
-                            context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=chat_id, text=modified_live_text)
                         except Unauthorized:
                             BLOCKED_USERS.add(chat_id)
                             print(f"User {chat_id} has blocked the bot.")
@@ -370,12 +370,12 @@ def forward_message(update, context):
                         print(f"User {chat_id} has blocked the bot.")
                 # Send to saved chats
                 send_to_saved_chats(context, modified_live_text)
-                context.bot.send_message(chat_id="-1001973683766", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                context.bot.send_message(chat_id="-1001973683766", text=modified_live_text)
                 # Forward to subscribers
                 for user_id, _ in subscribers:
                     if user_id not in BLOCKED_USERS:
                         try:
-                            context.bot.send_message(chat_id=user_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=user_id, text=modified_live_text)
                         except Unauthorized:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
@@ -392,20 +392,20 @@ def forward_message(update, context):
                 modified_text_custom = f"**{modified_text_custom}**"
                 for chat_id in GROUP_CHAT_IDS:
                     try:
-                        context.bot.send_message(chat_id=chat_id, text=modified_text, parse_mode=ParseMode.MARKDOWN_V2)
+                        context.bot.send_message(chat_id=chat_id, text=modified_text)
                     except Unauthorized:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 # Forward to groups
                 try:
-                    context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom)
                 except Unauthorized:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
-                context.bot.send_message(chat_id="-1001973683766", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+                context.bot.send_message(chat_id="-1001973683766", text=modified_text_custom)
                 send_to_saved_chats(context, modified_text_custom)
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
                         try:
-                            context.bot.send_message(chat_id=chat_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=chat_id, text=modified_text_custom)
                         except Unauthorized:
                             BLOCKED_USERS.add(chat_id)
                             print(f"User {chat_id} has blocked the bot.")
@@ -414,7 +414,7 @@ def forward_message(update, context):
                 for user_id, _ in subscribers:
                     if user_id not in BLOCKED_USERS:
                         try:
-                            context.bot.send_message(chat_id=user_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=user_id, text=modified_text_custom)
                         except Unauthorized:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
@@ -437,7 +437,7 @@ def forward_message(update, context):
 
 
  # Send the custom modified message to the specific group chat
-        #context.bot.send_message(chat_id=-1001973683766, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+        #context.bot.send_message(chat_id=-1001973683766, text=modified_text_custom)
 
 def ask_send_destination(update, context, message):
     keyboard = [
@@ -475,14 +475,14 @@ def button_callback(update, context):
         if data == "send_to_subscribers":
             for user_id, _ in SUBSCRIBERS:
                 try:
-                    context.bot.send_message(chat_id=user_id, text=message, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=user_id, text=message)
                 except Unauthorized:
                     print(f"User {user_id} has blocked the bot.")
             query.answer("Message sent to SUBSCRIBERS")
         elif data == "send_to_chat_ids":
             for chat_id in CHAT_IDS:
                 try:
-                    context.bot.send_message(chat_id=chat_id, text=message, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=chat_id, text=message)
                 except BadRequest as e:
                     if "Chat not found" in str(e):
                         print(f"Ignoring error for chat ID {chat_id}: {e}")
@@ -490,25 +490,25 @@ def button_callback(update, context):
                         print(f"Error sending message to chat ID {chat_id}: {e}")
             query.answer("Message sent to CHAT IDS")
         elif data == "send_to_channel":
-            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=message, parse_mode=ParseMode.MARKDOWN_V2)
+            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=message)
             query.answer("Message sent to CHANNEL")
         elif data == "send_to_all":
             for user_id, _ in SUBSCRIBERS:
                 try:
-                    context.bot.send_message(chat_id=user_id, text=message, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=user_id, text=message)
                 except Unauthorized:
                     print(f"User {user_id} has blocked the bot.")
             with open(CHAT_IDS_FILE, 'r') as f:
                 chat_ids = [int(line.strip()) for line in f]
             for chat_id in chat_ids:
                 try:
-                    context.bot.send_message(chat_id=chat_id, text=message, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id=chat_id, text=message)
                 except BadRequest as e:
                     if "Chat not found" in str(e):
                         print(f"Ignoring error for chat ID {chat_id}: {e}")
                     else:
                         print(f"Error sending message to chat ID {chat_id}: {e}")
-            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=message, parse_mode=ParseMode.MARKDOWN_V2)
+            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=message)
             query.answer("Message sent to ALL DESTINATIONS")
 
     query.answer()
