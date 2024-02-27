@@ -2,7 +2,7 @@ import datetime
 import pytz
 import re
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.constants import ParseMode, 
+from telegram.constants import ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.utils.helpers import escape_markdown
 from telegram.error import Unauthorized, BadRequest
