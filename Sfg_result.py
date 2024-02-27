@@ -4,7 +4,7 @@ import re
 import os
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
-from telegram.utils.helpers import escape_markdown
+from telegram.helpers import escape_markdown
 from telegram.error import Unauthorized, BadRequest
 import requests
 from bs4 import BeautifulSoup
