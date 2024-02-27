@@ -3,3 +3,4 @@ pytz
 flask
 requests
 beautifulsoup4
+urllib3
