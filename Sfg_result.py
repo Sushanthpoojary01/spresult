@@ -629,8 +629,6 @@ def main():
     updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
-  # Delete the webhook
-    updater.bot.delete_webhook()
             # Register the message handler
     message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
     dispatcher.add_handler(message_handler)
