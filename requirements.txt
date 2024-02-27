@@ -1,10 +1,10 @@
-python==3.9
 python-telegram-bot==13.7
 pytz
 flask
 requests
+urllib3==1.26.15 
+requests-toolbelt==0.10.1
 beautifulsoup4
-urllib3
 pyrogram
 bs4
 apscheduler
