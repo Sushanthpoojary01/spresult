@@ -2,6 +2,7 @@ import datetime
 import pytz
 import re
 import os
+from queue import Queue
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.helpers import escape_markdown
@@ -626,6 +627,8 @@ def allpan(update: Update, context: CallbackContext) -> None:
 
 def main():
     bot = Bot(token=TOKEN)
+
+    update_queue = Queue()
 
     updater = Updater(bot=bot, update_queue=update_queue)
     dispatcher = updater.dispatcher
