@@ -1,6 +1,5 @@
 python-telegram-bot==13.7
 pytz
-requests
 beautifulsoup4
 bs4
 
