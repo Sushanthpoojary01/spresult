@@ -306,7 +306,7 @@ def send_to_saved_chats(context, text):
             try:
                 context.bot.send_message(chat_id=chat_id, text=text)
                 print(f"Message sent successfully to chat ID: {chat_id}")
-            except Forbidden as e:
+            except Unauthorized as e:
                 BLOCKED_USERS.add(chat_id)
                 print(f"User {chat_id} has blocked the bot.")
             except ChatNotFound as e:
@@ -327,7 +327,7 @@ BLOCKED_USERS = set()
 def is_user_blocked(context, user_id):
     try:
         context.bot.send_message(chat_id=user_id, text="Checking if blocked")
-    except Forbidden as e:
+    except Unauthorized as e:
         return True  # User has blocked the bot
     return False  # User has not blocked the bot
 
@@ -350,18 +350,18 @@ def forward_message(update, context):
                 for chat_id in GROUP_CHAT_IDS:
                     try:
                         context.bot.send_message(chat_id=chat_id, text=modified_live_text)
-                    except Forbidden:
+                    except Unauthorized:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 try:
                     context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text)
-                except Forbidden:
+                except Unauthorized:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
                 # Forward to saved chat IDs
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
                         try:
                             context.bot.send_message(chat_id=chat_id, text=modified_live_text)
-                        except Forbidden:
+                        except Unauthorized:
                             BLOCKED_USERS.add(chat_id)
                             print(f"User {chat_id} has blocked the bot.")
                     else:
@@ -370,11 +370,11 @@ def forward_message(update, context):
                 send_to_saved_chats(context, modified_live_text)
                 context.bot.send_message(chat_id="-1001973683766", text=modified_live_text)
                 # Forward to subscribers
-                for user_id, _ in subscribers:
+                for user_id, _ in SUBSCRIBERS:
                     if user_id not in BLOCKED_USERS:
                         try:
                             context.bot.send_message(chat_id=user_id, text=modified_live_text)
-                        except Forbidden:
+                        except Unauthorized:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
                     else:
@@ -391,12 +391,12 @@ def forward_message(update, context):
                 for chat_id in GROUP_CHAT_IDS:
                     try:
                         context.bot.send_message(chat_id=chat_id, text=modified_text)
-                    except Forbidden:
+                    except Unauthorized:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 # Forward to groups
                 try:
                     context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom)
-                except Forbidden:
+                except Unauthorized:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
                 context.bot.send_message(chat_id="-1001973683766", text=modified_text_custom)
                 send_to_saved_chats(context, modified_text_custom)
@@ -409,11 +409,11 @@ def forward_message(update, context):
                             print(f"User {chat_id} has blocked the bot.")
                     else:
                         print(f"User {chat_id} has blocked the bot.")
-                for user_id, _ in subscribers:
+                for user_id, _ in SUBSCRIBERS:
                     if user_id not in BLOCKED_USERS:
                         try:
                             context.bot.send_message(chat_id=user_id, text=modified_text_custom)
-                        except Forbidden:
+                        except Unauthorized:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
                     else:
@@ -474,7 +474,7 @@ def button_callback(update, context):
             for user_id, _ in SUBSCRIBERS:
                 try:
                     context.bot.send_message(chat_id=user_id, text=message)
-                except Forbidden:
+                except Unauthorized:
                     print(f"User {user_id} has blocked the bot.")
             query.answer("Message sent to SUBSCRIBERS")
         elif data == "send_to_chat_ids":
@@ -494,7 +494,7 @@ def button_callback(update, context):
             for user_id, _ in SUBSCRIBERS:
                 try:
                     context.bot.send_message(chat_id=user_id, text=message)
-                except Forbidden:
+                except Unauthorized:
                     print(f"User {user_id} has blocked the bot.")
             with open(CHAT_IDS_FILE, 'r') as f:
                 chat_ids = [int(line.strip()) for line in f]
