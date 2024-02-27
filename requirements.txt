@@ -1,9 +1,6 @@
 python-telegram-bot==13.7
 pytz
-flask
 requests
-requests-toolbelt==0.10.1
 beautifulsoup4
-pyrogram
 bs4
-apscheduler
+
