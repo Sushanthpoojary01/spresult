@@ -3,7 +3,7 @@ import pytz
 import re
 import os
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.utils.helpers import escape_markdown
 from telegram.error import Unauthorized, BadRequest
 import requests
