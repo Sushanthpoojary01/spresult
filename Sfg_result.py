@@ -629,7 +629,7 @@ def main():
     bot = Bot(token=TOKEN)
 
     #creating an updater instance and pass the bot instance
-    updater = Updater(bot=bot, use_context=True)
+    updater = Updater(bot=bot)
     dispatcher = updater.dispatcher
             # Register the message handler
     message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
