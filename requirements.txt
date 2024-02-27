@@ -1,3 +1,4 @@
+python==3.9
 python-telegram-bot==13.7
 pytz
 flask
