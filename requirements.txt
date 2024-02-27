@@ -2,7 +2,7 @@ python-telegram-bot==13.7
 pytz
 flask
 requests
-urllib3==2.2.1
+urllib3==1.26.18
 requests-toolbelt==0.10.1
 beautifulsoup4
 pyrogram
