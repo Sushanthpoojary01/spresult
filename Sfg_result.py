@@ -2,7 +2,7 @@ import datetime
 import pytz
 import re
 import os
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.helpers import escape_markdown
 from telegram.error import Forbidden, BadRequest
@@ -628,8 +628,10 @@ def allpan(update: Update, context: CallbackContext) -> None:
 
 def main():
 
-    # Your main function where you initialize and start the bot
-    updater = Updater(TOKEN, use_context=True)
+    bot = Bot(token=TOKEN)
+
+    #creating an updater instance and pass the bot instance
+    updater = Updater(bot=bot, use_context=True)
     dispatcher = updater.dispatcher
             # Register the message handler
     message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
