@@ -2,4 +2,5 @@ python-telegram-bot==13.7
 pytz
 beautifulsoup4
 bs4
-
+aiohttp
+asyncio
