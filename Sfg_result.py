@@ -8,6 +8,9 @@ from telegram.utils.helpers import escape_markdown
 from telegram.error import Unauthorized, BadRequest
 import requests
 from bs4 import BeautifulSoup
+from keep_alive import keep_alive
+
+keep_alive()
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
 TOKEN = os.environ.get('TOKEN')
 #TOKEN = '6317382912:AAGF4ELdq-qhQQAJFcEjfe-iUw6rknbhpbg'
@@ -23,7 +26,7 @@ RELAY_GROUP_CHAT_ID = -1001978328470
 specific_chat_id = -1001173211941
 
 SUBSCRIBERS_FILE = 'subscribers2.txt'
-subscribers = set()
+SUBSCRIBERS = set()
 CHAT_IDS_FILE = 'chat_ids2.txt'
 CHAT_IDS = set()
 FORWARDED_MESSAGE_IDS = set()
@@ -209,6 +212,7 @@ def modify_live_message(text):
 
     return modified_text
 
+
 def subscribe(update, context):
     user = update.message.from_user
     user_id = user.id
@@ -219,7 +223,7 @@ def subscribe(update, context):
     chat_name = chat.title
 
     # Check if the user is already a subscriber
-    if (user_id, user_name) in subscribers:
+    if (user_id, user_name) in SUBSCRIBERS:
         update.message.reply_text("Welcome to SATTA MATKA LIVE UPDATES.\nYou are already subscribed to result updates.\nJoin @kalyanmatkaliveresults for Official Live Updates.")
         print(f"User {full_name or user_name} started the bot.")
 
@@ -273,7 +277,7 @@ def load_subscribers():
                 if line.startswith("# User ID: "):
                     user_id = int(re.search(r"# User ID: (\d+), User Name: (.+)", line).group(1))
                     user_name = re.search(r"# User ID: (\d+), User Name: (.+)", line).group(2)
-                    subscribers.add((user_id, user_name))
+                    SUBSCRIBERS.add((user_id, user_name))
     except FileNotFoundError:
         pass
 
@@ -281,7 +285,7 @@ load_subscribers()
 
 def save_subscribers():
     with open(SUBSCRIBERS_FILE, "w") as file:
-        for user_id, user_name in subscribers:
+        for user_id, user_name in SUBSCRIBERS:
             file.write(f"# User ID: {user_id}, User Name: {user_name}\n")
 
 def update_command(update, context):
