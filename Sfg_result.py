@@ -625,12 +625,11 @@ def allpan(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(Allpanels)
 
 def main():
-
     bot = Bot(token=TOKEN)
 
-    #creating an updater instance and pass the bot instance
-    updater = Updater(bot=bot)
+    updater = Updater(bot=bot, update_queue=update_queue)
     dispatcher = updater.dispatcher
+
             # Register the message handler
     message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
     dispatcher.add_handler(message_handler)
