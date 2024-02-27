@@ -1,1 +1,1 @@
-bot : python Sfg_result.py
+web : python Sfg_result.py
