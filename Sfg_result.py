@@ -8,9 +8,7 @@ from telegram.helpers import escape_markdown
 from telegram.error import Forbidden, BadRequest
 import requests
 from bs4 import BeautifulSoup
-from keep_alive import keep_alive
 
-keep_alive()
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
 TOKEN = os.environ.get('TOKEN')
 #TOKEN = '6317382912:AAGF4ELdq-qhQQAJFcEjfe-iUw6rknbhpbg'
