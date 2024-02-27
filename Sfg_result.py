@@ -2,11 +2,10 @@ import datetime
 import pytz
 import re
 import os
-from queue import Queue
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot
-from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
-from telegram.helpers import escape_markdown
-from telegram.error import Forbidden, BadRequest
+from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, Filters
+from telegram.utils.helpers import escape_markdown
+from telegram.error import Unauthorized, BadRequest
 import requests
 from bs4 import BeautifulSoup
 
@@ -626,13 +625,12 @@ def allpan(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(Allpanels)
 
 def main():
-    bot = Bot(token=TOKEN)
-
-    update_queue = Queue()
-
-    updater = Updater(bot=bot, update_queue=update_queue)
+  # Your main function where you initialize and start the bot
+    updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
+  # Delete the webhook
+    updater.bot.delete_webhook()
             # Register the message handler
     message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
     dispatcher.add_handler(message_handler)
