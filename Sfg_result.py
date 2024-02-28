@@ -395,7 +395,7 @@ def forward_message(update, context):
                         print(f"Group chat {chat_id} has blocked the bot.")
                 # Forward to groups
                 try:
-                    await context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
                 except Forbidden:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
                 send_to_saved_chats(context, modified_text_custom)
