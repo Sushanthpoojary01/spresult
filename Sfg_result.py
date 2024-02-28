@@ -12,7 +12,7 @@ import asyncio
 from bs4 import BeautifulSoup
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = os.environ.get('TOKEN')
+TOKEN = '6892521187:AAGX6BSKzrEWd2iA7UGNUOl6eojU6djhoHI'
 #TOKEN = '6317382912:AAGF4ELdq-qhQQAJFcEjfe-iUw6rknbhpbg'
 
 # Replace 'CHANNEL_USERNAME' with the username of the channel you want to forward messages from
@@ -684,7 +684,8 @@ def send_result_message_12am(context):
         if result_message:
             # Send the result message to the desired chat or channel
             context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=result_message)
-      
+    
+
 JODIFAM_FILE_PATH = "jodifam.txt"
 PAN_PATH = "Allpanels.txt"
 
@@ -697,6 +698,8 @@ def allpan(update: Update, context: CallbackContext) -> None:
     with open(PAN_PATH, 'r') as file:
         Allpanels = file.read()
     update.message.reply_text(Allpanels)
+    
+    
 
 def main():
     # Create a Bot instance
@@ -710,7 +713,7 @@ def main():
     application = builder.build()
 
     # Add handlers to the Application
-    application.add_handler(MessageHandler(filters.TEXT & filters.Update.channel_post, forward_message))
+    application.add_handler(MessageHandler(filters.TEXT, forward_message))
     application.add_handler(CommandHandler('start', subscribe))
     application.add_handler(CommandHandler('updates', update_command))
     application.add_handler(CommandHandler('live', live))
@@ -718,7 +721,7 @@ def main():
     application.add_handler(CommandHandler('jodifam', jodifam))
     application.add_handler(CommandHandler('allpan', allpan))
     application.add_handler(CallbackQueryHandler(button_callback))
-    application.add_handler(MessageHandler(filters.TEXT & (~filters.Command), relay_message))
+    application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), relay_message))
     application.add_handler(CommandHandler('code', code))
 
     # Start the bot with polling
