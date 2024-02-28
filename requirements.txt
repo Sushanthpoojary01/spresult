@@ -2,6 +2,5 @@ python-telegram-bot
 pytz
 beautifulsoup4
 bs4
-aiohttp
-asyncio
+requests
 flask
