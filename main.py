@@ -525,45 +525,41 @@ KALYANPAN_FILE_PATH = "kalyanpanel.txt"
 # Function to fetch live results from the website
 # Function to fetch live results from the website
 def fetch_live_results():
-    try:
-        # Disable proxy settings for requests
-        response = requests.get(URL, proxies={"https": None})
-        soup = BeautifulSoup(response.text, 'html.parser')
-        live_results_div = soup.find('div', class_='liv-rslt')
-        live_results = live_results_div.find_all('span', class_='h8')
-        live_results_values = live_results_div.find_all('span', class_='h9')
-        results = {}
-        for market, value in zip(live_results, live_results_values):
-            results[market.text.strip()] = value.text.strip()
-        return results
-    except Exception as e:
-        print("Error fetching live results:", e)
-        return None
+    response = requests.get(URL)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    live_results_div = soup.find('div', class_='liv-rslt')
+    live_results = live_results_div.find_all('span', class_='h8')
+    live_results_values = live_results_div.find_all('span', class_='h9')
+    results = {}
+    for market, value in zip(live_results, live_results_values):
+        results[market.text.strip()] = value.text.strip()
+    return results
 
+# Function to handle the /live command
+# Adjusted live function to accept update and context arguments
 # Function to handle the /live command
 # Adjusted live function to accept update and context arguments
 def live(update, context):
     live_results = fetch_live_results()
     if live_results:
-        message = "LIVE RESULTS:\n"
+        message = "LIVE RESULTS:\n\n"
         for market, value in live_results.items():
-            message += f"{market}: {value}\n"
-        # Send the message to the user
+            message += f"{market}: {value}\n\n"
+        
+        # Send the message to the user as a single message
         update.message.reply_text(message)
     else:
-        update.message.reply_text("Failed to fetch live results.")
+        update.message.reply_text("No live results available now, check /result for other market results.")
 
-
-
-def result(update: Update, context: CallbackContext) -> None:
-    # Fetch and send specific market results as one message
+def result(update, context):
     specific_market_results = fetch_specific_market_results()
     message = "RESULTS:\n\n"
     for market in markets_to_fetch:
         if market in specific_market_results:
             message += f"{market}: {specific_market_results[market]}\n\n"
+    return message  # Return the message string instead of sending it directly
 
-    update.message.reply_text(message)
+
 def fetch_specific_market_results():
     response = requests.get(URL)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -584,7 +580,38 @@ def fetch_specific_market_results():
 markets_to_fetch = ['SRIDEVI', 'TIME BAZAR', 'MADHUR DAY', 'MILAN DAY', 'RAJDHANI DAY', 'SUPREME DAY',
                     'KALYAN', 'SRIDEVI NIGHT', 'SUPREME NIGHT', 'MADHUR NIGHT', 'MILAN NIGHT', 'KALYAN NIGHT',
                     'RAJDHANI NIGHT', 'MAIN BAZAR', 'KARNATAKA DAY', 'MILAN MORNING', 'MADHUR MORNING']
+def result_command(update, context):
+    # Call the result function to get the result message
+    result_message = result(update, context)
+    if result_message:
+        # Send the result message to the user who sent the command
+        update.message.reply_text(result_message)
 
+def send_result_message_3pm(context):
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.datetime.now(ist_timezone)
+
+    # Check if the current time is 3:59 PM
+    if current_time.hour == 18 and current_time.minute == 25:
+        # Call the result function to get the result message
+        result_message = result(None, context)
+        if result_message:
+            # Send the result message to the desired chat or channel
+            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=result_message)
+
+# Define the function to send the result message at 12:20 AM
+def send_result_message_12am(context):
+    ist_timezone = pytz.timezone('Asia/Kolkata')
+    current_time = datetime.datetime.now(ist_timezone)
+
+    # Check if the current time is 12:20 AM
+    if current_time.hour == 0 and current_time.minute == 17:
+        # Call the result function to get the result message
+        result_message = result(None, context)
+        if result_message:
+            # Send the result message to the desired chat or channel
+            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=result_message)
+      
 JODIFAM_FILE_PATH = "jodifam.txt"
 PAN_PATH = "Allpanels.txt"
 
@@ -598,17 +625,11 @@ def allpan(update: Update, context: CallbackContext) -> None:
         Allpanels = file.read()
     update.message.reply_text(Allpanels)
 
-
-
 def main():
 
     # Your main function where you initialize and start the bot
     updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
-
-            # Delete the webhook
-    updater.bot.delete_webhook()
-
             # Register the message handler
     message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
     dispatcher.add_handler(message_handler)
@@ -620,7 +641,7 @@ def main():
     dispatcher.add_handler(updates_handler)
 
     dispatcher.add_handler(CommandHandler("live", live))
-    dispatcher.add_handler(CommandHandler("result", result))
+    dispatcher.add_handler(CommandHandler("result", result_command))
     dispatcher.add_handler(CommandHandler("jodifam", jodifam))
 
     dispatcher.add_handler(CommandHandler("allpan", allpan))
@@ -633,6 +654,12 @@ def main():
 
     code_handler = CommandHandler('code', code)
     dispatcher.add_handler(code_handler)
+
+    updater.job_queue.start()
+    job_queue = updater.job_queue
+    job_queue.run_daily(send_result_message_3pm, time=datetime.time(18, 25, tzinfo=pytz.timezone('Asia/Kolkata')))
+    job_queue.run_daily(send_result_message_12am, time=datetime.time(0, 17, tzinfo=pytz.timezone('Asia/Kolkata')))
+
 
             # Start the bot to receive updates using getUpdates method
     updater.start_polling()
