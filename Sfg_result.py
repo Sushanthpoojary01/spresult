@@ -12,7 +12,7 @@ import asyncio
 from bs4 import BeautifulSoup
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = '6892521187:AAGX6BSKzrEWd2iA7UGNUOl6eojU6djhoHI'
+TOKEN = os.environ.get('TOKEN')
 #TOKEN = '6317382912:AAGF4ELdq-qhQQAJFcEjfe-iUw6rknbhpbg'
 
 # Replace 'CHANNEL_USERNAME' with the username of the channel you want to forward messages from
