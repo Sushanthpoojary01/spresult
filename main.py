@@ -1,15 +1,18 @@
+from pyrogram import Client, filters
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 import datetime
 import pytz
 import re
-from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, Filters
-from telegram.utils.helpers import escape_markdown
-from telegram.error import Unauthorized, BadRequest
 import requests
 from bs4 import BeautifulSoup
 
 # 6317382912:AAGTEs8iV1NqvBQfI48uSiMaNBqNFsWftrUReplace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = '6892521187:AAGX6BSKzrEWd2iA7UGNUOl6eojU6djhoHI'
+
+api_id = "17374927"
+api_hash = "db19fda0699ab5701f1c1cc1e5c4091a"
+bot_token = "6892521187:AAGX6BSKzrEWd2iA7UGNUOl6eojU6djhoHI"
+app = Client("my_bot", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+
 # Replace 'CHANNEL_USERNAME' with the username of the channel you want to forward messages from
 CHANNEL_USERNAME = 'efghijkll'
 
@@ -436,6 +439,7 @@ def forward_message(update, context):
  # Send the custom modified message to the specific group chat
         #context.bot.send_message(chat_id=-1001973683766, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
 
+
 def ask_send_destination(update, context, message):
     keyboard = [
         [
@@ -453,7 +457,7 @@ def ask_send_destination(update, context, message):
     context.user_data['message'] = message  # Save the message in user_data
     update.message.reply_text(question, reply_markup=reply_markup)
 
-def relay_message(update: Update, context: CallbackContext):
+def relay_message(client, message):
     if update.effective_chat.id == RELAY_GROUP_ID:
         # Check if the update contains a message
         if update.message and update.message.text:
@@ -462,7 +466,7 @@ def relay_message(update: Update, context: CallbackContext):
             # Ask the sender where they want to send the message
             ask_send_destination(update, context, message)
 
-def button_callback(update, context):
+def button_callback(client, callback_query):
     query = update.callback_query
     data = query.data
     message = context.user_data.get('message', None)
@@ -510,7 +514,7 @@ def button_callback(update, context):
 
     query.answer()
 
-def code(update, context):
+def code(client, message):
     # Handle /code command
     code_message = "@SharathP23"
 
@@ -541,7 +545,8 @@ def fetch_live_results():
 
 # Function to handle the /live command
 # Adjusted live function to accept update and context arguments
-def live(update, context):
+
+def live(client, message):
     live_results = fetch_live_results()
     if live_results:
         message = "LIVE RESULTS:\n"
@@ -554,7 +559,7 @@ def live(update, context):
 
 
 
-def result(update: Update, context: CallbackContext) -> None:
+def result(client, message):
     # Fetch and send specific market results as one message
     specific_market_results = fetch_specific_market_results()
     message = "RESULTS:\n\n"
@@ -587,58 +592,55 @@ markets_to_fetch = ['SRIDEVI', 'TIME BAZAR', 'MADHUR DAY', 'MILAN DAY', 'RAJDHAN
 JODIFAM_FILE_PATH = "jodifam.txt"
 PAN_PATH = "Allpanels.txt"
 
-def jodifam(update: Update, context: CallbackContext) -> None:
+def jodifam(client, message):
     with open(JODIFAM_FILE_PATH, 'r') as file:
         jodifam_text = file.read()
     update.message.reply_text(jodifam_text)
 
-def allpan(update: Update, context: CallbackContext) -> None:
+def allpan(client, message):
     with open(PAN_PATH, 'r') as file:
         Allpanels = file.read()
     update.message.reply_text(Allpanels)
+    
+@app.on_message(filters.text & filters.channel)
+def relay_message(client, message):
+    relay_message(client, message)
 
+@app.on_message(filters.command("start"))
+def subscribe(client, message):
+    subscribe(client, message)
 
+@app.on_message(filters.command("updates"))
+def update_command(client, message):
+    update_command(client, message)
+
+@app.on_message(filters.command("live"))
+def live(client, message):
+    live(client, message)
+
+@app.on_message(filters.command("result"))
+def result(client, message):
+    result(client, message)
+
+@app.on_message(filters.command("jodifam"))
+def jodifam(client, message):
+    jodifam(client, message)
+
+@app.on_message(filters.command("allpan"))
+def allpan(client, message):
+    allpan(client, message)
+
+@app.on_callback_query()
+def button(client, callback_query):
+    button_callback(client, callback_query)
+
+@app.on_message(filters.command("code"))
+def code(client, message):
+    code(client, message)
 
 def main():
-
-    # Your main function where you initialize and start the bot
-    updater = Updater(TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
-
-            # Delete the webhook
-    updater.bot.delete_webhook()
-
-            # Register the message handler
-    message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
-    dispatcher.add_handler(message_handler)
-
-    start_handler = CommandHandler('start', subscribe)
-    dispatcher.add_handler(start_handler)
-
-    updates_handler = CommandHandler('updates', update_command)
-    dispatcher.add_handler(updates_handler)
-
-    dispatcher.add_handler(CommandHandler("live", live))
-    dispatcher.add_handler(CommandHandler("result", result))
-    dispatcher.add_handler(CommandHandler("jodifam", jodifam))
-
-    dispatcher.add_handler(CommandHandler("allpan", allpan))
-
-    button_handler = CallbackQueryHandler(button_callback)
-    dispatcher.add_handler(button_handler)
-
-    relay_handler = MessageHandler(Filters.text & (~Filters.command), relay_message)
-    dispatcher.add_handler(relay_handler)
-
-    code_handler = CommandHandler('code', code)
-    dispatcher.add_handler(code_handler)
-
-            # Start the bot to receive updates using getUpdates method
-    updater.start_polling()
-
-            # Run the bot until you press Ctrl-C
-    updater.idle()
-
+    app.run()
 
 if __name__ == '__main__':
     main()
+
