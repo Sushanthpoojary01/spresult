@@ -698,56 +698,28 @@ def allpan(update: Update, context: CallbackContext) -> None:
         Allpanels = file.read()
     update.message.reply_text(Allpanels)
 
-def main():
-  # Your main function where you initialize and start the bot
+async def main():
     bot = Bot(token=TOKEN)
-
-# Create an asyncio queue for updates
     update_queue = asyncio.Queue()
-
-# Create an Updater instance with the bot and update_queue
     updater = Updater(bot=bot, update_queue=update_queue)
 
-    dispatcher = updater.dispatcher
+    updater.dispatcher.add_handler(MessageHandler(Filters.text & Filters.update.channel_post, forward_message))
+    updater.dispatcher.add_handler(CommandHandler('start', subscribe))
+    updater.dispatcher.add_handler(CommandHandler('updates', update_command))
+    updater.dispatcher.add_handler(CommandHandler('live', live))
+    updater.dispatcher.add_handler(CommandHandler('result', result_command))
+    updater.dispatcher.add_handler(CommandHandler('jodifam', jodifam))
+    updater.dispatcher.add_handler(CommandHandler('allpan', allpan))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button_callback))
+    updater.dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), relay_message))
+    updater.dispatcher.add_handler(CommandHandler('code', code))
 
-            # Register the message handler
-    message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
-    dispatcher.add_handler(message_handler)
+    updater.job_queue.run_daily(send_result_message_3pm, time=datetime.time(18, 25, tzinfo=pytz.timezone('Asia/Kolkata')))
+    updater.job_queue.run_daily(send_result_message_12am, time=datetime.time(0, 17, tzinfo=pytz.timezone('Asia/Kolkata')))
 
-    start_handler = CommandHandler('start', subscribe)
-    dispatcher.add_handler(start_handler)
-
-    updates_handler = CommandHandler('updates', update_command)
-    dispatcher.add_handler(updates_handler)
-
-    dispatcher.add_handler(CommandHandler("live", live))
-    dispatcher.add_handler(CommandHandler("result", result_command))
-    dispatcher.add_handler(CommandHandler("jodifam", jodifam))
-
-    dispatcher.add_handler(CommandHandler("allpan", allpan))
-
-    button_handler = CallbackQueryHandler(button_callback)
-    dispatcher.add_handler(button_handler)
-
-    relay_handler = MessageHandler(Filters.text & (~Filters.command), relay_message)
-    dispatcher.add_handler(relay_handler)
-
-    code_handler = CommandHandler('code', code)
-    dispatcher.add_handler(code_handler)
-
-    updater.job_queue.start()
-    job_queue = updater.job_queue
-    job_queue.run_daily(send_result_message_3pm, time=datetime.time(18, 25, tzinfo=pytz.timezone('Asia/Kolkata')))
-    job_queue.run_daily(send_result_message_12am, time=datetime.time(0, 17, tzinfo=pytz.timezone('Asia/Kolkata')))
-
-
-            # Start the bot to receive updates using getUpdates method
     updater.start_polling()
-
-            # Run the bot until you press Ctrl-C
     updater.idle()
 
-
 if __name__ == '__main__':
-    main()
-
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
