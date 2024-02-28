@@ -10,6 +10,9 @@ from telegram.error import Forbidden, BadRequest
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
+from keep_alive import keep_alive
+
+keep_alive()
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
 TOKEN = os.environ.get('TOKEN')
