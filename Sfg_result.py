@@ -710,7 +710,7 @@ def main():
         
     )
     try :
-        application = Application.builder().token(TOKEN).persistence(persistence).build()
+        application = Application.builder().token(TOKEN).build()
     # Add handlers to the Application
         application.add_handler(MessageHandler(filters.TEXT, forward_message))
         application.add_handler(CommandHandler('start', subscribe))
