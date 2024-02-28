@@ -710,7 +710,7 @@ def main():
     application = builder.build()
 
     # Add handlers to the Application
-    application.add_handler(MessageHandler(filters.TEXT & filters.update.channel_post, forward_message))
+    application.add_handler(MessageHandler(filters.TEXT & filters.Update.Channel_post, forward_message))
     application.add_handler(CommandHandler('start', subscribe))
     application.add_handler(CommandHandler('updates', update_command))
     application.add_handler(CommandHandler('live', live))
@@ -718,7 +718,7 @@ def main():
     application.add_handler(CommandHandler('jodifam', jodifam))
     application.add_handler(CommandHandler('allpan', allpan))
     application.add_handler(CallbackQueryHandler(button_callback))
-    application.add_handler(MessageHandler(filters.TEXT & (~filters.command), relay_message))
+    application.add_handler(MessageHandler(filters.TEXT & (~filters.Command), relay_message))
     application.add_handler(CommandHandler('code', code))
 
     # Start the bot with polling
