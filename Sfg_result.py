@@ -727,10 +727,10 @@ def main():
         application.run_polling(allowed_updates=Update.ALL_TYPES)
         
      except error.NetworkError as e:
-        pass
+         pass
     
      except Exception as e:
-        logging.info(f"Error : {e}")
+         logging.info(f"Error : {e}")
 
 
 if __name__ == '__main__':
