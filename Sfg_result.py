@@ -725,13 +725,11 @@ def main():
         application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), relay_message))
         application.add_handler(CommandHandler('code', code))
         application.run_polling(allowed_updates=Update.ALL_TYPES)
-        
-     except error.NetworkError as e:
-         pass
     
-     except Exception as e:
-         logging.info(f"Error : {e}")
-
+    except error.NetworkError as e:
+        pass
+    except Exception as e:
+        logging.info(f"Error : {e}")
 
 if __name__ == '__main__':
     main()
