@@ -525,15 +525,20 @@ KALYANPAN_FILE_PATH = "kalyanpanel.txt"
 # Function to fetch live results from the website
 # Function to fetch live results from the website
 def fetch_live_results():
-    response = requests.get(URL)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    live_results_div = soup.find('div', class_='liv-rslt')
-    live_results = live_results_div.find_all('span', class_='h8')
-    live_results_values = live_results_div.find_all('span', class_='h9')
-    results = {}
-    for market, value in zip(live_results, live_results_values):
-        results[market.text.strip()] = value.text.strip()
-    return results
+    try:
+        # Disable proxy settings for requests
+        response = requests.get(URL, proxies={"https": None})
+        soup = BeautifulSoup(response.text, 'html.parser')
+        live_results_div = soup.find('div', class_='liv-rslt')
+        live_results = live_results_div.find_all('span', class_='h8')
+        live_results_values = live_results_div.find_all('span', class_='h9')
+        results = {}
+        for market, value in zip(live_results, live_results_values):
+            results[market.text.strip()] = value.text.strip()
+        return results
+    except Exception as e:
+        print("Error fetching live results:", e)
+        return None
 
 # Function to handle the /live command
 # Adjusted live function to accept update and context arguments
@@ -630,6 +635,8 @@ def main():
     # Your main function where you initialize and start the bot
     updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
+
+    updater.bot.delete_webhook()
             # Register the message handler
     message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
     dispatcher.add_handler(message_handler)
