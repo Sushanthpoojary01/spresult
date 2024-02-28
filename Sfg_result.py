@@ -15,7 +15,6 @@ keep_alive()
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
 TOKEN = os.environ.get('TOKEN')
-#TOKEN = '6317382912:AAGF4ELdq-qhQQAJFcEjfe-iUw6rknbhpbg'
 
 # Replace 'CHANNEL_USERNAME' with the username of the channel you want to forward messages from
 CHANNEL_USERNAME = 'efghijkll'
@@ -705,30 +704,34 @@ def allpan(update: Update, context: CallbackContext) -> None:
     
 
 def main():
-    # Create a Bot instance
-    bot = Bot(token=TOKEN)
-
-    # Create an Application builder and configure it
-    builder = Application.builder()
-    builder.bot(bot)
-
-    # Build the Application
-    application = builder.build()
-
+    
+    logging.basicConfig(
+        filename='bot.log',
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  
+        level=logging.WARNING
+        
+    )
+    try :
+        application = Application.builder().token(TOKEN).persistence(persistence).build()
     # Add handlers to the Application
-    application.add_handler(MessageHandler(filters.TEXT, forward_message))
-    application.add_handler(CommandHandler('start', subscribe))
-    application.add_handler(CommandHandler('updates', update_command))
-    application.add_handler(CommandHandler('live', live))
-    application.add_handler(CommandHandler('result', result_command))
-    application.add_handler(CommandHandler('jodifam', jodifam))
-    application.add_handler(CommandHandler('allpan', allpan))
-    application.add_handler(CallbackQueryHandler(button_callback))
-    application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), relay_message))
-    application.add_handler(CommandHandler('code', code))
+        application.add_handler(MessageHandler(filters.TEXT, forward_message))
+        application.add_handler(CommandHandler('start', subscribe))
+        application.add_handler(CommandHandler('updates', update_command))
+        application.add_handler(CommandHandler('live', live))
+        application.add_handler(CommandHandler('result', result_command))
+        application.add_handler(CommandHandler('jodifam', jodifam))
+        application.add_handler(CommandHandler('allpan', allpan))
+        application.add_handler(CallbackQueryHandler(button_callback))
+        application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), relay_message))
+        application.add_handler(CommandHandler('code', code))
+        application.run_polling(allowed_updates=Update.ALL_TYPES)
+        
+     except error.NetworkError as e:
+        pass
+    
+     except Exception as e:
+        logging.info(f"Error : {e}")
 
-    # Start the bot with polling
-    application.run_polling()
 
 if __name__ == '__main__':
     main()
