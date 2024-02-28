@@ -369,8 +369,7 @@ def forward_message(update, context):
                         print(f"User {chat_id} has blocked the bot.")
                 # Send to saved chats
                 send_to_saved_chats(context, modified_live_text)
-                context.bot.send_message(chat_id="-1001973683766", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-                # Forward to subscribers
+                  # Forward to subscribers
                 for user_id, _ in SUBSCRIBERS:
                     if user_id not in BLOCKED_USERS:
                         try:
@@ -399,7 +398,6 @@ def forward_message(update, context):
                     context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
                 except Forbidden:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
-                context.bot.send_message(chat_id="-1001973683766", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
                 send_to_saved_chats(context, modified_text_custom)
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
