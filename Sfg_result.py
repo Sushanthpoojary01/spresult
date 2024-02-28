@@ -719,6 +719,7 @@ async def main():
     )
     try :
         application = Application.builder().token(TOKEN).build()
+        await application.initialize()
     # Add handlers to the Application
         application.add_handler(MessageHandler(filters.TEXT, forward_message))
         application.add_handler(CommandHandler('start', subscribe))
@@ -738,6 +739,9 @@ async def main():
         pass
     except Exception as e:
         logging.info(f"Error : {e}")
+
+    finally:
+        await application.shutdown() 
 
 if __name__ == '__main__':
     asyncio.run(main())
