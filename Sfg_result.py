@@ -4,7 +4,7 @@ import re
 import os
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot
 from telegram.constants import ParseMode
-from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
+from telegram.ext import Updater, Application, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.helpers import escape_markdown
 from telegram.error import Forbidden, BadRequest
 import aiohttp
@@ -698,28 +698,31 @@ def allpan(update: Update, context: CallbackContext) -> None:
         Allpanels = file.read()
     update.message.reply_text(Allpanels)
 
-async def main():
+def main():
+    # Create a Bot instance
     bot = Bot(token=TOKEN)
-    update_queue = asyncio.Queue()
-    updater = Updater(bot=bot, update_queue=update_queue)
 
-    updater.dispatcher.add_handler(MessageHandler(Filters.text & Filters.update.channel_post, forward_message))
-    updater.dispatcher.add_handler(CommandHandler('start', subscribe))
-    updater.dispatcher.add_handler(CommandHandler('updates', update_command))
-    updater.dispatcher.add_handler(CommandHandler('live', live))
-    updater.dispatcher.add_handler(CommandHandler('result', result_command))
-    updater.dispatcher.add_handler(CommandHandler('jodifam', jodifam))
-    updater.dispatcher.add_handler(CommandHandler('allpan', allpan))
-    updater.dispatcher.add_handler(CallbackQueryHandler(button_callback))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text & (~Filters.command), relay_message))
-    updater.dispatcher.add_handler(CommandHandler('code', code))
+    # Create an Application builder and configure it
+    builder = Application.builder()
+    builder.bot(bot)
 
-    updater.job_queue.run_daily(send_result_message_3pm, time=datetime.time(18, 25, tzinfo=pytz.timezone('Asia/Kolkata')))
-    updater.job_queue.run_daily(send_result_message_12am, time=datetime.time(0, 17, tzinfo=pytz.timezone('Asia/Kolkata')))
+    # Build the Application
+    application = builder.build()
 
-    updater.start_polling()
-    updater.idle()
+    # Add handlers to the Application
+    application.add_handler(MessageHandler(filters.TEXT & filters.update.channel_post, forward_message))
+    application.add_handler(CommandHandler('start', subscribe))
+    application.add_handler(CommandHandler('updates', update_command))
+    application.add_handler(CommandHandler('live', live))
+    application.add_handler(CommandHandler('result', result_command))
+    application.add_handler(CommandHandler('jodifam', jodifam))
+    application.add_handler(CommandHandler('allpan', allpan))
+    application.add_handler(CallbackQueryHandler(button_callback))
+    application.add_handler(MessageHandler(filters.TEXT & (~filters.command), relay_message))
+    application.add_handler(CommandHandler('code', code))
+
+    # Start the bot with polling
+    application.run_polling()
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    main()
