@@ -710,7 +710,7 @@ def main():
     application = builder.build()
 
     # Add handlers to the Application
-    application.add_handler(MessageHandler(filters.TEXT & filters.Update.Channel_post, forward_message))
+    application.add_handler(MessageHandler(filters.TEXT & filters.Update.channel_post, forward_message))
     application.add_handler(CommandHandler('start', subscribe))
     application.add_handler(CommandHandler('updates', update_command))
     application.add_handler(CommandHandler('live', live))
