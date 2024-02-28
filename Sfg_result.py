@@ -744,4 +744,5 @@ async def main():
         await application.shutdown() 
 
 if __name__ == '__main__':
+    import asyncio
     asyncio.run(main())
