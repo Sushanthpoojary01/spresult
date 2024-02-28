@@ -1,20 +1,15 @@
 import datetime
 import pytz
 import re
-import os
-import logging
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot, error
-from telegram.constants import ParseMode
-from telegram.ext import Updater, Application, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
-from telegram.helpers import escape_markdown
-from telegram.error import Forbidden, BadRequest
+from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, Filters
+from telegram.utils.helpers import escape_markdown
+from telegram.error import Unauthorized, BadRequest
 import requests
-import asyncio
 from bs4 import BeautifulSoup
 
-# Replace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = os.environ.get('TOKEN')
-
+# 6317382912:AAGTEs8iV1NqvBQfI48uSiMaNBqNFsWftrUReplace 'YOUR_BOT_TOKEN' with your actual bot token
+TOKEN = '6892521187:AAGX6BSKzrEWd2iA7UGNUOl6eojU6djhoHI'
 # Replace 'CHANNEL_USERNAME' with the username of the channel you want to forward messages from
 CHANNEL_USERNAME = 'efghijkll'
 
@@ -26,8 +21,8 @@ RELAY_GROUP_CHAT_ID = -1001978328470
 specific_chat_id = -1001173211941
 
 SUBSCRIBERS_FILE = 'subscribers2.txt'
-SUBSCRIBERS = set()
 CHAT_IDS_FILE = 'chat_ids2.txt'
+SUBSCRIBERS = set()
 CHAT_IDS = set()
 FORWARDED_MESSAGE_IDS = set()
 
@@ -212,6 +207,8 @@ def modify_live_message(text):
 
     return modified_text
 
+subscribers = set()
+
 
 def subscribe(update, context):
     user = update.message.from_user
@@ -306,9 +303,9 @@ def send_to_saved_chats(context, text):
     try:
         for chat_id in CHAT_IDS:
             try:
-                context.bot.send_message(chat_id=chat_id, text=text)
+                context.bot.send_message(chat_id=chat_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
                 print(f"Message sent successfully to chat ID: {chat_id}")
-            except Forbidden as e:
+            except Unauthorized as e:
                 BLOCKED_USERS.add(chat_id)
                 print(f"User {chat_id} has blocked the bot.")
             except ChatNotFound as e:
@@ -322,14 +319,14 @@ def send_to_saved_chats(context, text):
 
 def send_to_subscribers(context, text):
     for user_id, _ in SUBSCRIBERS:
-        context.bot.send_message(chat_id=user_id, text=text)
+        context.bot.send_message(chat_id=user_id, text=text, parse_mode=ParseMode.MARKDOWN_V2)
 
 BLOCKED_USERS = set()
 
 def is_user_blocked(context, user_id):
     try:
         context.bot.send_message(chat_id=user_id, text="Checking if blocked")
-    except Forbidden as e:
+    except Unauthorized as e:
         return True  # User has blocked the bot
     return False  # User has not blocked the bot
 
@@ -352,30 +349,31 @@ def forward_message(update, context):
                 for chat_id in GROUP_CHAT_IDS:
                     try:
                         context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-                    except Forbidden:
+                    except Unauthorized:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 try:
                     context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-                except Forbidden:
+                except Unauthorized:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
                 # Forward to saved chat IDs
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
                         try:
                             context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-                        except Forbidden:
+                        except Unauthorized:
                             BLOCKED_USERS.add(chat_id)
                             print(f"User {chat_id} has blocked the bot.")
                     else:
                         print(f"User {chat_id} has blocked the bot.")
                 # Send to saved chats
                 send_to_saved_chats(context, modified_live_text)
-                  # Forward to subscribers
+                context.bot.send_message(chat_id="-1001973683766", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                # Forward to subscribers
                 for user_id, _ in SUBSCRIBERS:
                     if user_id not in BLOCKED_USERS:
                         try:
                             context.bot.send_message(chat_id=user_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-                        except Forbidden:
+                        except Unauthorized:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
                     else:
@@ -392,19 +390,20 @@ def forward_message(update, context):
                 for chat_id in GROUP_CHAT_IDS:
                     try:
                         context.bot.send_message(chat_id=chat_id, text=modified_text, parse_mode=ParseMode.MARKDOWN_V2)
-                    except Forbidden:
+                    except Unauthorized:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 # Forward to groups
                 try:
                     context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-                except Forbidden:
+                except Unauthorized:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
+                context.bot.send_message(chat_id="-1001973683766", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
                 send_to_saved_chats(context, modified_text_custom)
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
                         try:
                             context.bot.send_message(chat_id=chat_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-                        except Forbidden:
+                        except Unauthorized:
                             BLOCKED_USERS.add(chat_id)
                             print(f"User {chat_id} has blocked the bot.")
                     else:
@@ -413,13 +412,13 @@ def forward_message(update, context):
                     if user_id not in BLOCKED_USERS:
                         try:
                             context.bot.send_message(chat_id=user_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-                        except Forbidden:
+                        except Unauthorized:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
                     else:
                         print(f"User {user_id} has blocked the bot.")
                 FORWARDED_MESSAGE_IDS.add(message_id)
-    except Forbidden as e:
+    except Unauthorized as e:
         if update.effective_user:
             blocked_user_id = update.effective_user.id
             if (blocked_user_id, None) in SUBSCRIBERS:
@@ -436,16 +435,7 @@ def forward_message(update, context):
 
  # Send the custom modified message to the specific group chat
         #context.bot.send_message(chat_id=-1001973683766, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-async def some_function():
-    await context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-    await context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-    await context.bot.send_message(chat_id=user_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
-    # Your code
-    await context.bot.send_message(chat_id=chat_id, text=modified_text, parse_mode=ParseMode.MARKDOWN_V2)
-    await context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-    await context.bot.send_message(chat_id="-1001973683766", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-    await context.bot.send_message(chat_id=user_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-    
+
 def ask_send_destination(update, context, message):
     keyboard = [
         [
@@ -483,7 +473,7 @@ def button_callback(update, context):
             for user_id, _ in SUBSCRIBERS:
                 try:
                     context.bot.send_message(chat_id=user_id, text=message, parse_mode=ParseMode.MARKDOWN_V2)
-                except Forbidden:
+                except Unauthorized:
                     print(f"User {user_id} has blocked the bot.")
             query.answer("Message sent to SUBSCRIBERS")
         elif data == "send_to_chat_ids":
@@ -503,7 +493,7 @@ def button_callback(update, context):
             for user_id, _ in SUBSCRIBERS:
                 try:
                     context.bot.send_message(chat_id=user_id, text=message, parse_mode=ParseMode.MARKDOWN_V2)
-                except Forbidden:
+                except Unauthorized:
                     print(f"User {user_id} has blocked the bot.")
             with open(CHAT_IDS_FILE, 'r') as f:
                 chat_ids = [int(line.strip()) for line in f]
@@ -525,96 +515,54 @@ def code(update, context):
     code_message = "@SharathP23"
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=code_message)
-URL = 'https://dpboss.services/'
-KALYANPAN_FILE_PATH = "kalyanpanel.txt"
-JODIFAM_FILE_PATH = "jodifam.txt"
-PAN_PATH = "Allpanels.txt"
-markets_to_fetch = ['SRIDEVI', 'TIME BAZAR', 'MADHUR DAY', 'MILAN DAY', 'RAJDHANI DAY', 'SUPREME DAY',
-                    'KALYAN', 'SRIDEVI NIGHT', 'SUPREME NIGHT', 'MADHUR NIGHT', 'MILAN NIGHT', 'KALYAN NIGHT',
-                    'RAJDHANI NIGHT', 'MAIN BAZAR', 'KARNATAKA DAY', 'MILAN MORNING', 'MADHUR MORNING']
 
+# Define the URL of the website
+URL = 'https://dpboss.services/'
+urls = 'https://dpboss.services/panel-chart-record/kalyan.php'
+KALYANPAN_FILE_PATH = "kalyanpanel.txt"
 
 # Function to fetch live results from the website
+# Function to fetch live results from the website
 def fetch_live_results():
-    response = requests.get(URL)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    live_results_div = soup.find('div', class_='liv-rslt')
-    live_results = live_results_div.find_all('span', class_='h8')
-    live_results_values = live_results_div.find_all('span', class_='h9')
-    results = {}
-    for market, value in zip(live_results, live_results_values):
-        results[market.text.strip()] = value.text.strip()
-    return results
+    try:
+        # Disable proxy settings for requests
+        response = requests.get(URL, proxies={"https": None})
+        soup = BeautifulSoup(response.text, 'html.parser')
+        live_results_div = soup.find('div', class_='liv-rslt')
+        live_results = live_results_div.find_all('span', class_='h8')
+        live_results_values = live_results_div.find_all('span', class_='h9')
+        results = {}
+        for market, value in zip(live_results, live_results_values):
+            results[market.text.strip()] = value.text.strip()
+        return results
+    except Exception as e:
+        print("Error fetching live results:", e)
+        return None
 
-# Function to handle the /live command
-# Adjusted live function to accept update and context arguments
 # Function to handle the /live command
 # Adjusted live function to accept update and context arguments
 def live(update, context):
     live_results = fetch_live_results()
     if live_results:
-        message = "LIVE RESULTS:\n\n"
+        message = "LIVE RESULTS:\n"
         for market, value in live_results.items():
-            message += f"{market}: {value}\n\n"
-        
-        # Send the message to the user as a single message
+            message += f"{market}: {value}\n"
+        # Send the message to the user
         update.message.reply_text(message)
     else:
-        update.message.reply_text("No live results available now, check /result for other market results.")
-
-# async def fetch_live_results():
-#     try:
-#         async with aiohttp.ClientSession() as session:
-#             async with session.get(URL) as response:
-#                 if response.status == 200:
-#                     html_text = await response.text()
-#                     soup = BeautifulSoup(html_text, 'html.parser')
-#                     live_results_div = soup.find('div', class_='liv-rslt')
-#                     live_results = live_results_div.find_all('span', class_='h8')
-#                     live_results_values = live_results_div.find_all('span', class_='h9')
-#                     results = {}
-#                     for market, value in zip(live_results, live_results_values):
-#                         results[market.text.strip()] = value.text.strip()
-#                     return results
-#                 else:
-#                     print("Failed to fetch live results:", response.status)
-#                     return None
-#     except Exception as e:
-#         print("Error fetching live results:", e)
-#         return None
+        update.message.reply_text("Failed to fetch live results.")
 
 
-# async def live(update: Update, context: CallbackContext) -> None:
-#     live_results = await fetch_live_results()
-#     if live_results:
-#         message = "LIVE RESULTS:\n"
-#         for market, value in live_results.items():
-#             message += f"{market}: {value}\n"
-#         update.message.reply_text(message)
-#     else:
-#         update.message.reply_text("Failed to fetch live results.")
 
-
-# async def result(update: Update, context: CallbackContext) -> str:
-#     specific_market_results = await fetch_specific_market_results()
-#     if specific_market_results:
-#         message = "RESULTS:\n\n"
-#         for market in markets_to_fetch:
-#             if market in specific_market_results:
-#                 message += f"{market}: {specific_market_results[market]}\n\n"
-#         return message
-#     else:
-#         return "Failed to fetch specific market results."
-
-def result(update, context):
+def result(update: Update, context: CallbackContext) -> None:
+    # Fetch and send specific market results as one message
     specific_market_results = fetch_specific_market_results()
     message = "RESULTS:\n\n"
     for market in markets_to_fetch:
         if market in specific_market_results:
             message += f"{market}: {specific_market_results[market]}\n\n"
-    return message  # Return the message string instead of sending it directly
 
-
+    update.message.reply_text(message)
 def fetch_specific_market_results():
     response = requests.get(URL)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -630,69 +578,11 @@ def fetch_specific_market_results():
                 results[market_name] = market_value
 
     return results
-    
-# async def fetch_specific_market_results():
-#     try:
-#         async with aiohttp.ClientSession() as session:
-#             async with session.get(URL) as response:
-#                 if response.status == 200:
-#                     html_text = await response.text()
-#                     soup = BeautifulSoup(html_text, 'html.parser')
-#                     tkt_val_divs = soup.find_all('div', class_='tkt-val')
-#                     results = {}
-#                     for tkt_val_div in tkt_val_divs:
-#                         markets = tkt_val_div.find_all('div')
-#                         for market in markets:
-#                             market_name = market.find('h4').text.strip()
-#                             if market_name in markets_to_fetch:
-#                                 market_value = market.find('span').text.strip()
-#                                 results[market_name] = market_value
-#                     return results
-#                 else:
-#                     print("Failed to fetch specific market results:", response.status)
-#                     return None
-#     except Exception as e:
-#         print("Error fetching specific market results:", e)
-#         return None
-
-
 
 # List of markets to fetch results for
 markets_to_fetch = ['SRIDEVI', 'TIME BAZAR', 'MADHUR DAY', 'MILAN DAY', 'RAJDHANI DAY', 'SUPREME DAY',
                     'KALYAN', 'SRIDEVI NIGHT', 'SUPREME NIGHT', 'MADHUR NIGHT', 'MILAN NIGHT', 'KALYAN NIGHT',
                     'RAJDHANI NIGHT', 'MAIN BAZAR', 'KARNATAKA DAY', 'MILAN MORNING', 'MADHUR MORNING']
-def result_command(update, context):
-    # Call the result function to get the result message
-    result_message = result(update, context)
-    if result_message:
-        # Send the result message to the user who sent the command
-        update.message.reply_text(result_message)
-
-def send_result_message_3pm(context):
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.datetime.now(ist_timezone)
-
-    # Check if the current time is 3:59 PM
-    if current_time.hour == 18 and current_time.minute == 25:
-        # Call the result function to get the result message
-        result_message = result(None, context)
-        if result_message:
-            # Send the result message to the desired chat or channel
-            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=result_message)
-
-# Define the function to send the result message at 12:20 AM
-def send_result_message_12am(context):
-    ist_timezone = pytz.timezone('Asia/Kolkata')
-    current_time = datetime.datetime.now(ist_timezone)
-
-    # Check if the current time is 12:20 AM
-    if current_time.hour == 0 and current_time.minute == 17:
-        # Call the result function to get the result message
-        result_message = result(None, context)
-        if result_message:
-            # Send the result message to the desired chat or channel
-            context.bot.send_message(chat_id='@kalyanmatkaliveresults', text=result_message)
-    
 
 JODIFAM_FILE_PATH = "jodifam.txt"
 PAN_PATH = "Allpanels.txt"
@@ -706,43 +596,49 @@ def allpan(update: Update, context: CallbackContext) -> None:
     with open(PAN_PATH, 'r') as file:
         Allpanels = file.read()
     update.message.reply_text(Allpanels)
-    
-    
 
-async def main():
-    
-    logging.basicConfig(
-        filename='bot.log',
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  
-        level=logging.WARNING
-        
-    )
-    try :
-        application = Application.builder().token(TOKEN).build()
-        await application.initialize()
-    # Add handlers to the Application
-        application.add_handler(MessageHandler(filters.TEXT, forward_message))
-        application.add_handler(CommandHandler('start', subscribe))
-        application.add_handler(CommandHandler('updates', update_command))
-        application.add_handler(CommandHandler('live', live))
-        application.add_handler(CommandHandler('result', result_command))
-        application.add_handler(CommandHandler('jodifam', jodifam))
-        application.add_handler(CommandHandler('allpan', allpan))
-        application.add_handler(CallbackQueryHandler(button_callback))
-        application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), relay_message))
-        application.add_handler(CommandHandler('code', code))
-        application.run_polling(allowed_updates=Update.ALL_TYPES)
 
-        await some_function()
-    
-    except error.NetworkError as e:
-        pass
-    except Exception as e:
-        logging.info(f"Error : {e}")
 
-    finally:
-        await application.shutdown() 
+def main():
+
+    # Your main function where you initialize and start the bot
+    updater = Updater(TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
+
+            # Delete the webhook
+    updater.bot.delete_webhook()
+
+            # Register the message handler
+    message_handler = MessageHandler(Filters.text & Filters.update.channel_post, forward_message)
+    dispatcher.add_handler(message_handler)
+
+    start_handler = CommandHandler('start', subscribe)
+    dispatcher.add_handler(start_handler)
+
+    updates_handler = CommandHandler('updates', update_command)
+    dispatcher.add_handler(updates_handler)
+
+    dispatcher.add_handler(CommandHandler("live", live))
+    dispatcher.add_handler(CommandHandler("result", result))
+    dispatcher.add_handler(CommandHandler("jodifam", jodifam))
+
+    dispatcher.add_handler(CommandHandler("allpan", allpan))
+
+    button_handler = CallbackQueryHandler(button_callback)
+    dispatcher.add_handler(button_handler)
+
+    relay_handler = MessageHandler(Filters.text & (~Filters.command), relay_message)
+    dispatcher.add_handler(relay_handler)
+
+    code_handler = CommandHandler('code', code)
+    dispatcher.add_handler(code_handler)
+
+            # Start the bot to receive updates using getUpdates method
+    updater.start_polling()
+
+            # Run the bot until you press Ctrl-C
+    updater.idle()
+
 
 if __name__ == '__main__':
-    import asyncio
-    asyncio.run(main())
+    main()
