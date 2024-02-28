@@ -9,7 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 
 # 6317382912:AAGTEs8iV1NqvBQfI48uSiMaNBqNFsWftrUReplace 'YOUR_BOT_TOKEN' with your actual bot token
-TOKEN = '6892521187:AAGX6BSKzrEWd2iA7UGNUOl6eojU6djhoHI'
+TOKEN = os.getenv('BOT_TOKEN')
 # Replace 'CHANNEL_USERNAME' with the username of the channel you want to forward messages from
 CHANNEL_USERNAME = 'efghijkll'
 
