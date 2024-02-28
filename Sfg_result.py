@@ -2,7 +2,7 @@ import datetime
 import pytz
 import re
 import os
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot
 from telegram.constants import ParseMode
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.helpers import escape_markdown
@@ -700,7 +700,14 @@ def allpan(update: Update, context: CallbackContext) -> None:
 
 def main():
   # Your main function where you initialize and start the bot
-    updater = Updater(TOKEN, use_context=True)
+    bot = Bot(token=TOKEN)
+
+# Create an asyncio queue for updates
+    update_queue = asyncio.Queue()
+
+# Create an Updater instance with the bot and update_queue
+    updater = Updater(bot=bot, update_queue=update_queue)
+
     dispatcher = updater.dispatcher
 
             # Register the message handler
