@@ -350,18 +350,18 @@ def forward_message(update, context):
                 # Forward to channels
                 for chat_id in GROUP_CHAT_IDS:
                     try:
-                        await context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                        context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
                     except Forbidden:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 try:
-                    await context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                    context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
                 except Forbidden:
                     print("Channel @kalyanmatkaliveresults has blocked the bot.")
                 # Forward to saved chat IDs
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
                         try:
-                            await context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
                         except Forbidden:
                             BLOCKED_USERS.add(chat_id)
                             print(f"User {chat_id} has blocked the bot.")
@@ -373,7 +373,7 @@ def forward_message(update, context):
                 for user_id, _ in SUBSCRIBERS:
                     if user_id not in BLOCKED_USERS:
                         try:
-                            await context.bot.send_message(chat_id=user_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=user_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
                         except Forbidden:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
@@ -390,7 +390,7 @@ def forward_message(update, context):
                 modified_text_custom = f"**{modified_text_custom}**"
                 for chat_id in GROUP_CHAT_IDS:
                     try:
-                        await context.bot.send_message(chat_id=chat_id, text=modified_text, parse_mode=ParseMode.MARKDOWN_V2)
+                        context.bot.send_message(chat_id=chat_id, text=modified_text, parse_mode=ParseMode.MARKDOWN_V2)
                     except Forbidden:
                         print(f"Group chat {chat_id} has blocked the bot.")
                 # Forward to groups
@@ -402,7 +402,7 @@ def forward_message(update, context):
                 for chat_id in CHAT_IDS:
                     if chat_id not in BLOCKED_USERS:
                         try:
-                            await context.bot.send_message(chat_id=chat_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=chat_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
                         except Forbidden:
                             BLOCKED_USERS.add(chat_id)
                             print(f"User {chat_id} has blocked the bot.")
@@ -411,7 +411,7 @@ def forward_message(update, context):
                 for user_id, _ in SUBSCRIBERS:
                     if user_id not in BLOCKED_USERS:
                         try:
-                            await context.bot.send_message(chat_id=user_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+                            context.bot.send_message(chat_id=user_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
                         except Forbidden:
                             BLOCKED_USERS.add(user_id)
                             print(f"User {user_id} has blocked the bot.")
@@ -435,7 +435,16 @@ def forward_message(update, context):
 
  # Send the custom modified message to the specific group chat
         #context.bot.send_message(chat_id=-1001973683766, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
-
+async def some_function():
+    await context.bot.send_message(chat_id=chat_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+    await context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+    await context.bot.send_message(chat_id=user_id, text=modified_live_text, parse_mode=ParseMode.MARKDOWN_V2)
+    # Your code
+    await context.bot.send_message(chat_id=chat_id, text=modified_text, parse_mode=ParseMode.MARKDOWN_V2)
+    await context.bot.send_message(chat_id="@kalyanmatkaliveresults", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+    await context.bot.send_message(chat_id="-1001973683766", text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+    await context.bot.send_message(chat_id=user_id, text=modified_text_custom, parse_mode=ParseMode.MARKDOWN_V2)
+    
 def ask_send_destination(update, context, message):
     keyboard = [
         [
@@ -721,6 +730,8 @@ def main():
         application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), relay_message))
         application.add_handler(CommandHandler('code', code))
         application.run_polling(allowed_updates=Update.ALL_TYPES)
+
+        await some_function()
     
     except error.NetworkError as e:
         pass
