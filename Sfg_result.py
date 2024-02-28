@@ -708,7 +708,7 @@ def allpan(update: Update, context: CallbackContext) -> None:
     
     
 
-def main():
+async def main():
     
     logging.basicConfig(
         filename='bot.log',
