@@ -3,7 +3,7 @@ import pytz
 import re
 import os
 import logging
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot, error
 from telegram.constants import ParseMode
 from telegram.ext import Updater, Application, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.helpers import escape_markdown
