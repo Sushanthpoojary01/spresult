@@ -7,8 +7,7 @@ from telegram.constants import ParseMode
 from telegram.ext import Updater, Application, CommandHandler, CallbackContext, CallbackQueryHandler, MessageHandler, filters
 from telegram.helpers import escape_markdown
 from telegram.error import Forbidden, BadRequest
-import aiohttp
-import asyncio
+import requests
 from bs4 import BeautifulSoup
 from keep_alive import keep_alive
 
@@ -531,124 +530,125 @@ markets_to_fetch = ['SRIDEVI', 'TIME BAZAR', 'MADHUR DAY', 'MILAN DAY', 'RAJDHAN
 
 
 # Function to fetch live results from the website
-# def fetch_live_results():
-#     response = requests.get(URL)
-#     soup = BeautifulSoup(response.text, 'html.parser')
-#     live_results_div = soup.find('div', class_='liv-rslt')
-#     live_results = live_results_div.find_all('span', class_='h8')
-#     live_results_values = live_results_div.find_all('span', class_='h9')
-#     results = {}
-#     for market, value in zip(live_results, live_results_values):
-#         results[market.text.strip()] = value.text.strip()
-#     return results
+def fetch_live_results():
+    response = requests.get(URL)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    live_results_div = soup.find('div', class_='liv-rslt')
+    live_results = live_results_div.find_all('span', class_='h8')
+    live_results_values = live_results_div.find_all('span', class_='h9')
+    results = {}
+    for market, value in zip(live_results, live_results_values):
+        results[market.text.strip()] = value.text.strip()
+    return results
 
 # Function to handle the /live command
 # Adjusted live function to accept update and context arguments
 # Function to handle the /live command
 # Adjusted live function to accept update and context arguments
-# def live(update, context):
-#     live_results = fetch_live_results()
-#     if live_results:
-#         message = "LIVE RESULTS:\n\n"
-#         for market, value in live_results.items():
-#             message += f"{market}: {value}\n\n"
-        
-#         # Send the message to the user as a single message
-#         update.message.reply_text(message)
-#     else:
-#         update.message.reply_text("No live results available now, check /result for other market results.")
-
-async def fetch_live_results():
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(URL) as response:
-                if response.status == 200:
-                    html_text = await response.text()
-                    soup = BeautifulSoup(html_text, 'html.parser')
-                    live_results_div = soup.find('div', class_='liv-rslt')
-                    live_results = live_results_div.find_all('span', class_='h8')
-                    live_results_values = live_results_div.find_all('span', class_='h9')
-                    results = {}
-                    for market, value in zip(live_results, live_results_values):
-                        results[market.text.strip()] = value.text.strip()
-                    return results
-                else:
-                    print("Failed to fetch live results:", response.status)
-                    return None
-    except Exception as e:
-        print("Error fetching live results:", e)
-        return None
-
-
-async def live(update: Update, context: CallbackContext) -> None:
-    live_results = await fetch_live_results()
+def live(update, context):
+    live_results = fetch_live_results()
     if live_results:
-        message = "LIVE RESULTS:\n"
+        message = "LIVE RESULTS:\n\n"
         for market, value in live_results.items():
-            message += f"{market}: {value}\n"
+            message += f"{market}: {value}\n\n"
+        
+        # Send the message to the user as a single message
         update.message.reply_text(message)
     else:
-        update.message.reply_text("Failed to fetch live results.")
+        update.message.reply_text("No live results available now, check /result for other market results.")
+
+# async def fetch_live_results():
+#     try:
+#         async with aiohttp.ClientSession() as session:
+#             async with session.get(URL) as response:
+#                 if response.status == 200:
+#                     html_text = await response.text()
+#                     soup = BeautifulSoup(html_text, 'html.parser')
+#                     live_results_div = soup.find('div', class_='liv-rslt')
+#                     live_results = live_results_div.find_all('span', class_='h8')
+#                     live_results_values = live_results_div.find_all('span', class_='h9')
+#                     results = {}
+#                     for market, value in zip(live_results, live_results_values):
+#                         results[market.text.strip()] = value.text.strip()
+#                     return results
+#                 else:
+#                     print("Failed to fetch live results:", response.status)
+#                     return None
+#     except Exception as e:
+#         print("Error fetching live results:", e)
+#         return None
 
 
-async def result(update: Update, context: CallbackContext) -> str:
-    specific_market_results = await fetch_specific_market_results()
-    if specific_market_results:
-        message = "RESULTS:\n\n"
-        for market in markets_to_fetch:
-            if market in specific_market_results:
-                message += f"{market}: {specific_market_results[market]}\n\n"
-        return message
-    else:
-        return "Failed to fetch specific market results."
-
-# def result(update, context):
-#     specific_market_results = fetch_specific_market_results()
-#     message = "RESULTS:\n\n"
-#     for market in markets_to_fetch:
-#         if market in specific_market_results:
-#             message += f"{market}: {specific_market_results[market]}\n\n"
-#     return message  # Return the message string instead of sending it directly
+# async def live(update: Update, context: CallbackContext) -> None:
+#     live_results = await fetch_live_results()
+#     if live_results:
+#         message = "LIVE RESULTS:\n"
+#         for market, value in live_results.items():
+#             message += f"{market}: {value}\n"
+#         update.message.reply_text(message)
+#     else:
+#         update.message.reply_text("Failed to fetch live results.")
 
 
-# def fetch_specific_market_results():
-#     response = requests.get(URL)
-#     soup = BeautifulSoup(response.text, 'html.parser')
-#     tkt_val_divs = soup.find_all('div', class_='tkt-val')
+# async def result(update: Update, context: CallbackContext) -> str:
+#     specific_market_results = await fetch_specific_market_results()
+#     if specific_market_results:
+#         message = "RESULTS:\n\n"
+#         for market in markets_to_fetch:
+#             if market in specific_market_results:
+#                 message += f"{market}: {specific_market_results[market]}\n\n"
+#         return message
+#     else:
+#         return "Failed to fetch specific market results."
 
-#     results = {}
-#     for tkt_val_div in tkt_val_divs:
-#         markets = tkt_val_div.find_all('div')
-#         for market in markets:
-#             market_name = market.find('h4').text.strip()
-#             if market_name in markets_to_fetch:
-#                 market_value = market.find('span').text.strip()
-#                 results[market_name] = market_value
+def result(update, context):
+    specific_market_results = fetch_specific_market_results()
+    message = "RESULTS:\n\n"
+    for market in markets_to_fetch:
+        if market in specific_market_results:
+            message += f"{market}: {specific_market_results[market]}\n\n"
+    return message  # Return the message string instead of sending it directly
 
-#     return results
-async def fetch_specific_market_results():
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(URL) as response:
-                if response.status == 200:
-                    html_text = await response.text()
-                    soup = BeautifulSoup(html_text, 'html.parser')
-                    tkt_val_divs = soup.find_all('div', class_='tkt-val')
-                    results = {}
-                    for tkt_val_div in tkt_val_divs:
-                        markets = tkt_val_div.find_all('div')
-                        for market in markets:
-                            market_name = market.find('h4').text.strip()
-                            if market_name in markets_to_fetch:
-                                market_value = market.find('span').text.strip()
-                                results[market_name] = market_value
-                    return results
-                else:
-                    print("Failed to fetch specific market results:", response.status)
-                    return None
-    except Exception as e:
-        print("Error fetching specific market results:", e)
-        return None
+
+def fetch_specific_market_results():
+    response = requests.get(URL)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    tkt_val_divs = soup.find_all('div', class_='tkt-val')
+
+    results = {}
+    for tkt_val_div in tkt_val_divs:
+        markets = tkt_val_div.find_all('div')
+        for market in markets:
+            market_name = market.find('h4').text.strip()
+            if market_name in markets_to_fetch:
+                market_value = market.find('span').text.strip()
+                results[market_name] = market_value
+
+    return results
+    
+# async def fetch_specific_market_results():
+#     try:
+#         async with aiohttp.ClientSession() as session:
+#             async with session.get(URL) as response:
+#                 if response.status == 200:
+#                     html_text = await response.text()
+#                     soup = BeautifulSoup(html_text, 'html.parser')
+#                     tkt_val_divs = soup.find_all('div', class_='tkt-val')
+#                     results = {}
+#                     for tkt_val_div in tkt_val_divs:
+#                         markets = tkt_val_div.find_all('div')
+#                         for market in markets:
+#                             market_name = market.find('h4').text.strip()
+#                             if market_name in markets_to_fetch:
+#                                 market_value = market.find('span').text.strip()
+#                                 results[market_name] = market_value
+#                     return results
+#                 else:
+#                     print("Failed to fetch specific market results:", response.status)
+#                     return None
+#     except Exception as e:
+#         print("Error fetching specific market results:", e)
+#         return None
 
 
 
