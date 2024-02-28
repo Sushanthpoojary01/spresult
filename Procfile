@@ -1,1 +1,1 @@
-web : python Sfg_result.py
+worker: python3 main.py
