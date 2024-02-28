@@ -9,6 +9,7 @@ from telegram.ext import Updater, Application, CommandHandler, CallbackContext, 
 from telegram.helpers import escape_markdown
 from telegram.error import Forbidden, BadRequest
 import requests
+import asyncio
 from bs4 import BeautifulSoup
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token
@@ -739,4 +740,4 @@ async def main():
         logging.info(f"Error : {e}")
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
