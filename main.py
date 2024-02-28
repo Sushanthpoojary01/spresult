@@ -6,6 +6,7 @@ from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQuery
 from telegram.utils.helpers import escape_markdown
 from telegram.error import Unauthorized, BadRequest
 import requests
+import os
 from bs4 import BeautifulSoup
 
 # 6317382912:AAGTEs8iV1NqvBQfI48uSiMaNBqNFsWftrUReplace 'YOUR_BOT_TOKEN' with your actual bot token
