@@ -597,7 +597,7 @@ def send_result_message_3pm(context):
     current_time = datetime.datetime.now(ist_timezone)
 
     # Check if the current time is 3:59 PM
-    if current_time.hour == 18 and current_time.minute == 25:
+    if current_time.hour == 18 and current_time.minute == 35:
         # Call the result function to get the result message
         result_message = result(None, context)
         if result_message:
@@ -610,7 +610,7 @@ def send_result_message_12am(context):
     current_time = datetime.datetime.now(ist_timezone)
 
     # Check if the current time is 12:20 AM
-    if current_time.hour == 0 and current_time.minute == 17:
+    if current_time.hour == 0 and current_time.minute == 18:
         # Call the result function to get the result message
         result_message = result(None, context)
         if result_message:
@@ -664,8 +664,8 @@ def main():
 
     updater.job_queue.start()
     job_queue = updater.job_queue
-    job_queue.run_daily(send_result_message_3pm, time=datetime.time(18, 25, tzinfo=pytz.timezone('Asia/Kolkata')))
-    job_queue.run_daily(send_result_message_12am, time=datetime.time(0, 17, tzinfo=pytz.timezone('Asia/Kolkata')))
+    job_queue.run_daily(send_result_message_3pm, time=datetime.time(18, 35, tzinfo=pytz.timezone('Asia/Kolkata')))
+    job_queue.run_daily(send_result_message_12am, time=datetime.time(0, 18, tzinfo=pytz.timezone('Asia/Kolkata')))
 
 
             # Start the bot to receive updates using getUpdates method
